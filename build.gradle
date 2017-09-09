@@ -1,0 +1,46 @@
+
+// should be started with the plugins block.
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '1.5.6.RELEASE'
+    id 'idea'
+}
+
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.springframework.boot:spring-boot-starter-web'
+    compile 'com.fasterxml.jackson.core:jackson-core'
+    compile 'com.fasterxml.jackson.core:jackson-annotations'
+    compile 'com.fasterxml.jackson.core:jackson-databind'
+    compile 'commons-io:commons-io:2.5'
+    testCompile 'org.springframework.boot:spring-boot-starter-test'
+}
+
+group 'de.krafft.audiowizard'
+version '1.0-SNAPSHOT'
+sourceCompatibility = 1.8
+jar {
+    doFirst {
+        println "Packaging " + project.name
+    }
+    baseName = 'AudioWizard'
+    version =  '0.1.0'
+}
+
+// For further information about configuration see
+//     https://docs.spring.io/spring-boot/docs/current/reference/html/build-tool-plugins-gradle-plugin.html
+bootRepackage {
+    enabled = true
+    mainClass = 'de.krafft.audiowizard.Application'
+    excludeDevtools = true
+}
+
+bootRun {
+    addResources = true
+}
+
+
