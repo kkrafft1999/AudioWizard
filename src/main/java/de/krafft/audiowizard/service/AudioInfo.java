@@ -3,12 +3,14 @@ package de.krafft.audiowizard.service;
 public class AudioInfo {
 
     private String filename;
+    private long filelength;
     private String type;
     private long frameSize;
     private int frameLength;
     private float frameRate;
     private float sampleRate;
     private long sampleSizeinBits;
+    private int bytesPerSample;
     private long byteLength;
     private int channels;
     private boolean isBigEndian;
@@ -19,7 +21,6 @@ public class AudioInfo {
     public String getType() {
         return type;
     }
-
     void setType(String type) {
         this.type = type;
     }
@@ -27,7 +28,6 @@ public class AudioInfo {
     public long getFrameSize() {
         return frameSize;
     }
-
     void setFrameSize(long frameSize) {
         this.frameSize = frameSize;
     }
@@ -35,7 +35,6 @@ public class AudioInfo {
     public float getFrameRate() {
         return frameRate;
     }
-
     void setFrameRate(float frameRate) {
         this.frameRate = frameRate;
     }
@@ -43,21 +42,16 @@ public class AudioInfo {
     public long getByteLength() {
         return byteLength;
     }
-
     void setByteLength(long byteLength) {
         this.byteLength = byteLength;
     }
 
-
     public long getSampleSizeinBits() {
         return sampleSizeinBits;
     }
-
     void setSampleSizeinBits(int sampleSizeinBits) {
         this.sampleSizeinBits = sampleSizeinBits;
     }
-
-
 
     public float getSampleRate() {
         return sampleRate;
@@ -105,5 +99,21 @@ public class AudioInfo {
 
     public String getFilename() {
         return filename;
+    }
+
+    public void setFilelength(long filelength) {
+        this.filelength = filelength;
+    }
+
+    public long getFilelength() {
+        return filelength;
+    }
+
+    void setBytesPerSample(int bytesPerSample) {
+        this.bytesPerSample = bytesPerSample;
+    }
+
+    public int getBytesPerSample() {
+        return bytesPerSample;
     }
 }

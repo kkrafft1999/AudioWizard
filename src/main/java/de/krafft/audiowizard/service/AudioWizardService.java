@@ -6,7 +6,6 @@ import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
 @Service
@@ -17,24 +16,26 @@ public class AudioWizardService {
      * see http://www.jsresources.org/examples/AudioFileInfo.java.html
      *
      */
-    public AudioInfo getAudioInfo(InputStream inputStream, String filename) throws Exception {
+    public AudioInfo getAudioInfo(InputStream inputStream) throws Exception {
 
         AudioInfo info = new AudioInfo();
-        info.setFilename(filename);
-
-
         AudioFileFormat aff = AudioSystem.getAudioFileFormat(inputStream);
+        AudioInputStream ais = AudioSystem.getAudioInputStream(inputStream);
+        AudioFormat af = aff.getFormat();
 
         info.setType(aff.getType().toString());
-        info.setByteLength(aff.getByteLength());
 
-        AudioFormat af = aff.getFormat();
+        int bytesPerSample = SimpleAudioConversion.bytesPerSample(af.getSampleSizeInBits());
+        info.setBytesPerSample(bytesPerSample);
+        info.setChannels(af.getChannels());
+
+        info.setByteLength(ais.getFrameLength()*bytesPerSample*af.getChannels());
         info.setFrameSize(af.getFrameSize());
         info.setFrameRate(af.getFrameRate());
         info.setFrameLength(aff.getFrameLength());
         info.setSampleRate(af.getSampleRate());
         info.setSampleSizeinBits(af.getSampleSizeInBits());
-        info.setChannels(af.getChannels());
+
         info.setBigEndian(af.isBigEndian());
         info.setEncoding(af.getEncoding().toString());
 
@@ -59,9 +60,18 @@ public class AudioWizardService {
     public float[] getAudioSamples(InputStream inputStream, int position, int count) throws Exception {
 
         AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(inputStream);
+        AudioFormat format = audioInputStream.getFormat();
+        int bytesPerSample = SimpleAudioConversion.bytesPerSample(format.getSampleSizeInBits());
 
+        float[] samples = new float[count];
+        byte[] buffer = new byte[count*bytesPerSample];
 
-        return new float[0];
+        final long skip = audioInputStream.skip(position * bytesPerSample);
+        final int read = audioInputStream.read(buffer, 0, buffer.length);
+
+        final int nConverted = SimpleAudioConversion.unpack(buffer, samples, count * bytesPerSample, format);
+
+        return samples;
 
     }
 }

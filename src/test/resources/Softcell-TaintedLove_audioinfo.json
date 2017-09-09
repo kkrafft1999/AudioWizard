@@ -1,12 +1,14 @@
 {
   "filename": "Softcell-TaintedLove.wav",
+  "filelength": 31141450,
   "type": "WAVE",
   "frameSize": 4,
   "frameLength": 7785326,
   "frameRate": 48000.0,
   "sampleRate": 48000.0,
   "sampleSizeinBits": 16,
-  "byteLength": 31141450,
+  "bytesPerSample": 2,
+  "byteLength": 31141304,
   "channels": 2,
   "encoding": "PCM_SIGNED",
   "bigEndian": false

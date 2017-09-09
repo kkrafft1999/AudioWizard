@@ -22,10 +22,10 @@ import java.util.Arrays;
 @MultipartConfig(fileSizeThreshold = 20971520) // 20MB
 class AudioWizardController {
 
-    String info = "<h1>AudioWizard Version 1.0</h1>";
+    private String info = "<h1>AudioWizard Version 1.0</h1>";
 
     @Autowired
-    AudioWizardService service;
+    private AudioWizardService service;
 
     @RequestMapping("/")
     @ResponseBody
@@ -38,7 +38,9 @@ class AudioWizardController {
     String audioinfo(@RequestParam("audiofile") MultipartFile audioFileRef) {
 
         try {
-            AudioInfo info = service.getAudioInfo(audioFileRef.getInputStream(), audioFileRef.getOriginalFilename());
+            AudioInfo info = service.getAudioInfo(audioFileRef.getInputStream());
+            info.setFilename(audioFileRef.getOriginalFilename());
+            info.setFilelength(audioFileRef.getSize());
 
             ObjectMapper mapper = new ObjectMapper();
             return mapper.writeValueAsString(info);
@@ -48,9 +50,9 @@ class AudioWizardController {
         }
     }
 
-    @RequestMapping("/audiodata")
+    @RequestMapping("/audiobytedata")
     @ResponseBody
-    String audiodata(@RequestParam("offset")int pos,@RequestParam("count")int count,@RequestParam("audiofile") MultipartFile audioFileRef)
+    String audiobytedata(@RequestParam("offset")int pos,@RequestParam("count")int count,@RequestParam("audiofile") MultipartFile audioFileRef)
     {
 
         try {
@@ -61,8 +63,22 @@ class AudioWizardController {
         }
     }
 
+    @RequestMapping("/audiosampledata")
+    @ResponseBody
+    String audiosampledata(@RequestParam("offset")int pos,@RequestParam("count")int count,@RequestParam("audiofile") MultipartFile audioFileRef)
+    {
 
-    public String getInfo() {
+        try {
+            float[] samples;
+            samples = service.getAudioSamples( audioFileRef.getInputStream(), pos, count );
+            return Arrays.toString(samples);
+        } catch (Exception e) {
+            return e.toString();
+        }
+    }
+
+
+    private String getInfo() {
         return info;
     }
 }

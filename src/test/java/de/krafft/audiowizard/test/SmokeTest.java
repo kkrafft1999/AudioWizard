@@ -42,7 +42,7 @@ public class SmokeTest {
     }
 
     @Test
-    public void getAudioData() throws Exception {
+    public void getAudioBytedata() throws Exception {
 
         byte[] blob = IOUtils.toByteArray(getClass().getResourceAsStream("/Softcell-TaintedLove.wav"));
         String expectedJson = new String(IOUtils.toByteArray(getClass().getResourceAsStream("/Softcell-TaintedLove_audioinfo.json")));
@@ -50,11 +50,29 @@ public class SmokeTest {
         MockMultipartFile audioFile = new MockMultipartFile("audiofile", "Softcell-TaintedLove.wav", "audio/wav", blob);
         MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
-        mockMvc.perform(MockMvcRequestBuilders.fileUpload("/audiodata").file(audioFile)
+        mockMvc.perform(MockMvcRequestBuilders.fileUpload("/audiobytedata").file(audioFile)
                 .param("offset","65535").param("count","21"))
                 .andExpect(status().is(200))
-                .andExpect(content().string("----"));
+                .andExpect(content().string("[83, -10, 110, -3, -19, -9, -108, -3, 19, -6, -38, -3, -69, -5, -103, -3, -58, -4, -58, -4, 0]"));
 
 
     }
+
+    @Test
+    public void getAudioSampledata() throws Exception {
+
+        byte[] blob = IOUtils.toByteArray(getClass().getResourceAsStream("/Softcell-TaintedLove.wav"));
+        String expectedJson = new String(IOUtils.toByteArray(getClass().getResourceAsStream("/Softcell-TaintedLove_audioinfo.json")));
+
+        MockMultipartFile audioFile = new MockMultipartFile("audiofile", "Softcell-TaintedLove.wav", "audio/wav", blob);
+        MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+
+        mockMvc.perform(MockMvcRequestBuilders.fileUpload("/audiosampledata").file(audioFile)
+                .param("offset","50000").param("count","10"))
+                .andExpect(status().is(200))
+                .andExpect(content().string("[0.2927246, 0.25012207, 0.283844, 0.2340393, 0.27407837, 0.22393799, 0.26687622, 0.22024536, 0.26361084, 0.2232666]"));
+
+
+    }
+
 }
