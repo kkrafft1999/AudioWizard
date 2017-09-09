@@ -14,8 +14,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.io.BufferedInputStream;
-
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -30,18 +28,32 @@ public class SmokeTest {
     @Test
     public void getAudioInfo() throws Exception {
 
-        byte[] blob = IOUtils.toByteArray(getClass().getResourceAsStream("/SoftCell-TaintedLove.wav"));
-        String expectedJson = new String(IOUtils.toByteArray(getClass().getResourceAsStream("/SoftCell-TaintedLove_audioinfo.json")));
+        byte[] blob = IOUtils.toByteArray(getClass().getResourceAsStream("/Softcell-TaintedLove.wav"));
+        String expectedJson = new String(IOUtils.toByteArray(getClass().getResourceAsStream("/Softcell-TaintedLove_audioinfo.json")));
 
-        MockMultipartFile audioFile = new MockMultipartFile("audiofile", "SoftCell-TaintedLove.wav", "audio/wav", blob);
+        MockMultipartFile audioFile = new MockMultipartFile("audiofile", "Softcell-TaintedLove.wav", "audio/wav", blob);
         MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
-        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.fileUpload("/audioinfo");
-
-        mockMvc.perform(MockMvcRequestBuilders.fileUpload("/audioinfo").file(audioFile)
-                .param("some-random", "4"))
+        mockMvc.perform(MockMvcRequestBuilders.fileUpload("/audioinfo").file(audioFile))
                 .andExpect(status().is(200))
                 .andExpect(content().json(expectedJson));
+
+
+    }
+
+    @Test
+    public void getAudioData() throws Exception {
+
+        byte[] blob = IOUtils.toByteArray(getClass().getResourceAsStream("/Softcell-TaintedLove.wav"));
+        String expectedJson = new String(IOUtils.toByteArray(getClass().getResourceAsStream("/Softcell-TaintedLove_audioinfo.json")));
+
+        MockMultipartFile audioFile = new MockMultipartFile("audiofile", "Softcell-TaintedLove.wav", "audio/wav", blob);
+        MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+
+        mockMvc.perform(MockMvcRequestBuilders.fileUpload("/audiodata").file(audioFile)
+                .param("offset","65535").param("count","21"))
+                .andExpect(status().is(200))
+                .andExpect(content().string("----"));
 
 
     }

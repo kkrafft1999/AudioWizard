@@ -2,6 +2,7 @@ package de.krafft.audiowizard.service;
 
 public class AudioInfo {
 
+    private String filename;
     private String type;
     private long frameSize;
     private int frameLength;
@@ -12,6 +13,7 @@ public class AudioInfo {
     private int channels;
     private boolean isBigEndian;
     private String encoding;
+
 
 
     public String getType() {
@@ -55,6 +57,8 @@ public class AudioInfo {
         this.sampleSizeinBits = sampleSizeinBits;
     }
 
+
+
     public float getSampleRate() {
         return sampleRate;
     }
@@ -93,5 +97,13 @@ public class AudioInfo {
 
     void setFrameLength(int frameLength) {
         this.frameLength = frameLength;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
+
+    public String getFilename() {
+        return filename;
     }
 }
