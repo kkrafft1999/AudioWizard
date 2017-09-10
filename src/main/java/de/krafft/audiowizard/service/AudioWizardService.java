@@ -25,7 +25,7 @@ public class AudioWizardService {
 
         info.setType(aff.getType().toString());
 
-        int bytesPerSample = SimpleAudioConversion.bytesPerSample(af.getSampleSizeInBits());
+        int bytesPerSample = AudioSampleConversion.bytesPerSample(af.getSampleSizeInBits());
         info.setBytesPerSample(bytesPerSample);
         info.setChannels(af.getChannels());
 
@@ -57,21 +57,32 @@ public class AudioWizardService {
     }
 
     // see https://stackoverflow.com/questions/26824663/how-do-i-use-audio-sample-data-from-java-sound
-    public float[] getAudioSamples(InputStream inputStream, int position, int count) throws Exception {
+    public AudioSampleFrame[] getAudioSamples(InputStream inputStream, int position, int numberOfFrames) throws Exception {
 
         AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(inputStream);
         AudioFormat format = audioInputStream.getFormat();
-        int bytesPerSample = SimpleAudioConversion.bytesPerSample(format.getSampleSizeInBits());
+        int bytesPerSample = AudioSampleConversion.bytesPerSample(format.getSampleSizeInBits());
+        int numberOfchannels = format.getChannels();
 
-        float[] samples = new float[count];
-        byte[] buffer = new byte[count*bytesPerSample];
+        float[] samples = new float[numberOfFrames*numberOfchannels];
+        byte[] buffer = new byte[samples.length*bytesPerSample];
 
-        final long skip = audioInputStream.skip(position * bytesPerSample);
+        final long skip = audioInputStream.skip(position * numberOfchannels * bytesPerSample);
         final int read = audioInputStream.read(buffer, 0, buffer.length);
 
-        final int nConverted = SimpleAudioConversion.unpack(buffer, samples, count * bytesPerSample, format);
+        final int nConverted = AudioSampleConversion.unpack(buffer, samples, buffer.length, format);
 
-        return samples;
+        AudioSampleFrame[] frames = new AudioSampleFrame[numberOfFrames];
+
+        for (int i = 0; i < frames.length; i++) {
+            frames[i] = new AudioSampleFrame(numberOfchannels);
+            for(int c=0; c<numberOfchannels; c++) {
+                frames[i].setSample( samples[i*numberOfchannels+c],c);
+            }
+
+        }
+
+        return frames;
 
     }
 }

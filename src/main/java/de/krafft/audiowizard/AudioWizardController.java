@@ -2,6 +2,7 @@ package de.krafft.audiowizard;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.krafft.audiowizard.service.AudioInfo;
+import de.krafft.audiowizard.service.AudioSampleFrame;
 import de.krafft.audiowizard.service.AudioWizardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -69,9 +70,16 @@ class AudioWizardController {
     {
 
         try {
-            float[] samples;
-            samples = service.getAudioSamples( audioFileRef.getInputStream(), pos, count );
-            return Arrays.toString(samples);
+            StringBuilder result = new StringBuilder("[");
+            AudioSampleFrame[] frames = service.getAudioSamples( audioFileRef.getInputStream(), pos, count );
+            ObjectMapper mapper = new ObjectMapper();
+
+            for (int i=0;i<frames.length;i++) {
+                result.append(mapper.writeValueAsString(frames[i]));
+                if(i<frames.length-1) result.append(",");
+            }
+
+            return result.append("]").toString();
         } catch (Exception e) {
             return e.toString();
         }

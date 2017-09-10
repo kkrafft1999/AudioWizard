@@ -35,8 +35,8 @@ import static java.lang.Math.exp;
  * @author Radiodef
  * @see <a href="http://stackoverflow.com/a/26824664/2891664">Overview on StackOverflow.com</a>
  */
-public final class SimpleAudioConversion {
-    private SimpleAudioConversion() {}
+public final class AudioSampleConversion {
+    private AudioSampleConversion() {}
 
     /**
      * Converts:
@@ -59,9 +59,9 @@ public final class SimpleAudioConversion {
      *  or {@code (samples.length < blen / bytesPerSample(fmt.getBitsPerSample()))}.
      */
     static int unpack(byte[]      bytes,
-                             float[]     samples,
-                             int         blen,
-                             AudioFormat fmt) {
+                      float[]     samples,
+                      int         blen,
+                      AudioFormat fmt) {
         int   bitsPerSample = fmt.getSampleSizeInBits();
         int  bytesPerSample = bytesPerSample(bitsPerSample);
         boolean isBigEndian = fmt.isBigEndian();
@@ -72,36 +72,37 @@ public final class SimpleAudioConversion {
         int s = 0;
         while (i < blen) {
             long temp = unpackBits(bytes, i, isBigEndian, bytesPerSample);
-            float sample = 0f;
-
-            if (encoding == Encoding.PCM_SIGNED) {
-                temp = extendSign(temp, bitsPerSample);
-                sample = (float) (temp / fullScale);
-
-            } else if (encoding == Encoding.PCM_UNSIGNED) {
-                temp = signUnsigned(temp, bitsPerSample);
-                sample = (float) (temp / fullScale);
-
-            } else if (encoding == Encoding.PCM_FLOAT) {
-                if (bitsPerSample == 32) {
-                    sample = Float.intBitsToFloat((int) temp);
-                } else if (bitsPerSample == 64) {
-                    sample = (float) Double.longBitsToDouble(temp);
-                }
-            } else if (encoding == Encoding.ULAW) {
-                sample = bitsToMuLaw(temp);
-
-            } else if (encoding == Encoding.ALAW) {
-                sample = bitsToALaw(temp);
-            }
-
-            samples[s] = sample;
-
             i += bytesPerSample;
-            s++;
+            samples[s++] = getSample(bitsPerSample, encoding, fullScale, temp);
         }
 
         return s;
+    }
+
+    public static float getSample(int bitsPerSample, Encoding encoding, double fullScale, long temp) {
+        float sample = 0f;
+
+        if (encoding == Encoding.PCM_SIGNED) {
+            temp = extendSign(temp, bitsPerSample);
+            sample = (float) (temp / fullScale);
+
+        } else if (encoding == Encoding.PCM_UNSIGNED) {
+            temp = signUnsigned(temp, bitsPerSample);
+            sample = (float) (temp / fullScale);
+
+        } else if (encoding == Encoding.PCM_FLOAT) {
+            if (bitsPerSample == 32) {
+                sample = Float.intBitsToFloat((int) temp);
+            } else if (bitsPerSample == 64) {
+                sample = (float) Double.longBitsToDouble(temp);
+            }
+        } else if (encoding == Encoding.ULAW) {
+            sample = bitsToMuLaw(temp);
+
+        } else if (encoding == Encoding.ALAW) {
+            sample = bitsToALaw(temp);
+        }
+        return sample;
     }
 
     /**
@@ -203,11 +204,11 @@ public final class SimpleAudioConversion {
      * @param bitsPerSample the return value of {@code AudioFormat.getBitsPerSample}.
      * @return the largest magnitude representable by the audio format.
      */
-    private static double fullScale(int bitsPerSample) {
-        return pow(2.0, bitsPerSample - 1);
+    public static float fullScale(int bitsPerSample) {
+        return (float) pow(2.0, bitsPerSample - 1);
     }
 
-    private static long unpackBits(byte[]  bytes,
+    public static long unpackBits(byte[]  bytes,
                                    int     i,
                                    boolean isBigEndian,
                                    int     bytesPerSample) {
@@ -375,7 +376,7 @@ public final class SimpleAudioConversion {
             temp = -(temp ^ 0x80L);
         }
 
-        float sample = (float) (temp / fullScale(8));
+        float sample = (temp / fullScale(8));
 
         return (float) (
                 signum(sample)
@@ -409,7 +410,7 @@ public final class SimpleAudioConversion {
             temp = -(temp ^ 0x80L);
         }
 
-        float sample = (float) (temp / fullScale(8));
+        float sample = temp / fullScale(8);
 
         float sign = signum(sample);
         sample = abs(sample);

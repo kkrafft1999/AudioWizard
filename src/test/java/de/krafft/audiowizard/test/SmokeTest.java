@@ -45,7 +45,7 @@ public class SmokeTest {
     public void getAudioBytedata() throws Exception {
 
         byte[] blob = IOUtils.toByteArray(getClass().getResourceAsStream("/Softcell-TaintedLove.wav"));
-        String expectedJson = new String(IOUtils.toByteArray(getClass().getResourceAsStream("/Softcell-TaintedLove_audioinfo.json")));
+
 
         MockMultipartFile audioFile = new MockMultipartFile("audiofile", "Softcell-TaintedLove.wav", "audio/wav", blob);
         MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
@@ -62,15 +62,15 @@ public class SmokeTest {
     public void getAudioSampledata() throws Exception {
 
         byte[] blob = IOUtils.toByteArray(getClass().getResourceAsStream("/Softcell-TaintedLove.wav"));
-        String expectedJson = new String(IOUtils.toByteArray(getClass().getResourceAsStream("/Softcell-TaintedLove_audioinfo.json")));
+        String expectedJson = new String(IOUtils.toByteArray(getClass().getResourceAsStream("/Audioframes_25000-25004.json")));
 
         MockMultipartFile audioFile = new MockMultipartFile("audiofile", "Softcell-TaintedLove.wav", "audio/wav", blob);
         MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
         mockMvc.perform(MockMvcRequestBuilders.fileUpload("/audiosampledata").file(audioFile)
-                .param("offset","50000").param("count","10"))
+                .param("offset","25000").param("count","5"))
                 .andExpect(status().is(200))
-                .andExpect(content().string("[0.2927246, 0.25012207, 0.283844, 0.2340393, 0.27407837, 0.22393799, 0.26687622, 0.22024536, 0.26361084, 0.2232666]"));
+                .andExpect(content().json(expectedJson));
 
 
     }
