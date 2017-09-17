@@ -4,15 +4,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.krafft.audiowizard.service.AudioInfo;
 import de.krafft.audiowizard.service.AudioSampleFrame;
 import de.krafft.audiowizard.service.AudioWizardService;
+import de.krafft.audiowizard.service.Oscillator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.tritonus.share.sampled.AudioFileTypes;
 
 import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.http.HttpServletResponse;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
 
 
 /**
@@ -82,6 +92,39 @@ class AudioWizardController {
             return result.append("]").toString();
         } catch (Exception e) {
             return e.toString();
+        }
+    }
+
+
+    // http://localhost:8080/oscillator?waveform=0&frequency=2500&amplitude=0.5&samplerate=48000&samplesizeinbits=16&channels=2&duration=3
+    @RequestMapping("/oscillator")
+    @ResponseBody
+    void oscillator(@RequestParam("waveform")int nWaveform,
+                                  @RequestParam("frequency")float fFrequency,
+                                  @RequestParam("amplitude") float fAmplitude,
+                                  @RequestParam("samplerate") float fSampleRate,
+                                  @RequestParam("samplesizeinbits") int nSampleSizeInBits,
+                                  @RequestParam("channels") int nChannels,
+                                  @RequestParam("duration") int nDuration,
+                                  HttpServletResponse response)
+    {
+
+        int nFrameSize = nSampleSizeInBits / 8 * nChannels;
+
+        try {
+
+            AudioFormat audioFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED,
+                    fSampleRate, nSampleSizeInBits, nChannels, nFrameSize, fSampleRate, false);
+            long	nLengthInFrames = Math.round(nDuration * fSampleRate);
+            AudioInputStream inputStream = new Oscillator(nWaveform, fFrequency, fAmplitude, audioFormat, nLengthInFrames);
+
+            response.setContentType("audio/basic");
+            response.setHeader("Content-Disposition", "attachment; filename=\"Oscillatortone-"+fFrequency+"Hz-"+nDuration+"sec.au\"");
+            AudioSystem.write(inputStream, AudioFileTypes.AU, response.getOutputStream());
+            response.flushBuffer();
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
